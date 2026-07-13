@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matu Venao - Stand-Up Comedy</title>
+<meta name="description" content="Matu Venao, comediante de stand-up uruguayo. Fechas de shows en Uruguay y Argentina, biografía, videos y cuentos.">
+<meta name="theme-color" content="#0e0e10">
+
+<!-- Cómo se ve el link al compartirlo en WhatsApp, Instagram, etc. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Matu Venao - Stand-Up Comedy">
+<meta property="og:description" content="Fechas de shows, videos y cuentos. Gira por Uruguay y Argentina.">
+<meta property="og:image" content="img/biografia/main.webp">
+<meta property="og:locale" content="es_UY">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230e0e10'/%3E%3Ctext x='50' y='68' font-size='52' font-weight='900' font-family='Arial' text-anchor='middle' fill='%23f54c2e'%3EMV%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://www.googleapis.com">
+
+<link rel="stylesheet" href="css/style.css">
+<script src="js/gradiente-fallback.js"></script>
+</head>
+<body>
+
+<svg width="0" height="0" style="position: absolute;">
+  <filter id="efecto-agua">
+    <feTurbulence type="turbulence" baseFrequency="0.015 0.03" numOctaves="2" seed="7" result="turbulencia">
+      <animate attributeName="baseFrequency" dur="25s" values="0.015 0.03;0.025 0.05;0.015 0.03" repeatCount="indefinite" />
+    </feTurbulence>
+    <feDisplacementMap in="SourceGraphic" in2="turbulencia" scale="22" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
+
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="#inicio" class="logo text-gradiente">MATU VENAO</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="navLinks">
+      <a href="#inicio">Inicio</a>
+      <a href="#fechas">Fechas</a>
+      <a href="#biografia">Biografía</a>
+      <a href="#youtube">YouTube</a>
+      <a href="#cuentos">Cuentos</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<section id="inicio" class="hero">
+  <div class="hero-slider" id="heroSlider">
+    <!-- slides insertados por js/banner.js -->
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
+</section>
+
+<div class="marquee" id="marquee">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+
+<section id="fechas" class="section">
+  <h2>Próximas Fechas</h2>
+  <div id="fechasList" class="fechas-list">
+    <p class="loading">Cargando fechas...</p>
+  </div>
+</section>
+
+<section id="biografia" class="section section-alt">
+  <h2>Biografía</h2>
+  <div id="bioContent" class="bio-content glass">
+    <p class="loading">Cargando biografía...</p>
+  </div>
+</section>
+
+<section id="galeria" class="galeria-section">
+  <div class="galeria-track" id="galeriaTrack"></div>
+</section>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">&times;</button>
+  <button class="lightbox-arrow lightbox-prev" id="lightboxPrev" aria-label="Anterior">&#10094;</button>
+  <div class="lightbox-track" id="lightboxTrack"></div>
+  <button class="lightbox-arrow lightbox-next" id="lightboxNext" aria-label="Siguiente">&#10095;</button>
+</div>
+
+<section id="youtube" class="section">
+  <h2>YouTube</h2>
+  <div class="youtube-wrap glass">
+    <div id="youtubeList" class="youtube-grid">
+      <p class="loading">Cargando videos...</p>
+    </div>
+  </div>
+  <a id="youtubeChannelLink" href="#" target="_blank" class="btn-outline text-gradiente">Ir a mi canal de YouTube</a>
+</section>
+
+<section id="cuentos" class="section section-alt">
+  <h2>Cuentos</h2>
+  <div id="cuentosList" class="cuentos-grid glass">
+    <p class="loading">Cargando cuentos...</p>
+  </div>
+</section>
+
+<section id="contacto" class="section">
+  <h2>Contacto</h2>
+  <div class="contacto-content">
+    <p>¿Querés contratar un show o simplemente escribirme?</p>
+    <a id="contactoEmail" href="#" class="btn-outline text-gradiente">Escribime</a>
+    <p id="contactoTelefono" class="contacto-telefono"></p>
+    <div class="redes" id="redesList"></div>
+  </div>
+</section>
+
+<footer class="footer glass">
+  <p>&copy; <span id="anioActual"></span> Matu Venao. Todos los derechos reservados.</p>
+  <p class="footer-legal">Aviso Legal: Matu Venao es una marca operada por Matías León.</p>
+</footer>
+
+<script src="js/marquee.js"></script>
+<script src="js/banner.js"></script>
+<script src="js/galeria.js"></script>
+<script src="js/fechas.js"></script>
+<script src="js/bio.js"></script>
+<script src="js/youtube.js"></script>
+<script src="js/cuentos.js"></script>
+<script src="js/contacto.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

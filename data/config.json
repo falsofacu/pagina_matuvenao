@@ -1,0 +1,19 @@
+{
+  "sendsToLandingPage": true,
+  "youtube": {
+    "channelId": "UCvMPTMNp9E1NpOREQd05Pdg",
+    "apiKey": "AIzaSyBlq75lafRf6QPd_AevDb6p_Asyi9xYioQ",
+    "maxResults": 6,
+    "channelUrl": "https://www.youtube.com/@matuvenao"
+  },
+  "contacto": {
+    "email": "info@matuvenao.com",
+    "telefono": "+598 93 993 042"
+  },
+  "redes": {
+    "facebook": "https://www.facebook.com/matuvenao",
+    "instagram": "https://www.instagram.com/matuvenao/",
+    "youtube": "https://www.youtube.com/@matuvenao",
+    "tiktok": "https://www.tiktok.com/@matuvenao"
+  }
+}
