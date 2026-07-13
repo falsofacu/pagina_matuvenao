@@ -56,6 +56,16 @@
     return resultados.find(Boolean) || 'img/biografia/main.webp';
   }
 
+  function metaPixelParams(evento) {
+    return {
+      content_name: evento.titulo,
+      content_ids: [evento.id],
+      content_category: evento.show || 'Show de stand up',
+      content_type: 'product',
+      currency: evento.pais === 'AR' ? 'ARS' : 'UYU',
+    };
+  }
+
   function render(evento, descripcion, portadaPorDefecto) {
     const portada = evento.portada || portadaPorDefecto;
     const direccion = [evento.lugar, evento.direccion2, evento.ciudad].filter(Boolean).join(', ');
@@ -94,9 +104,18 @@
             <p class="evento-datos-fecha text-gradiente">${formatFecha(evento.fecha)}${evento.hora ? ' · ' + evento.hora + ' hs' : ''}</p>
             <p class="evento-datos-lugar">${direccion}</p>
           </div>
-          <a href="${evento.link}" target="_blank" rel="noopener" class="evento-comprar-btn">Comprar entrada</a>
+          <a href="${evento.link}" target="_blank" rel="noopener" class="evento-comprar-btn" id="btnComprarEntrada">Comprar entrada</a>
         </aside>
       </div>`;
+
+    if (typeof fbq === 'function') fbq('track', 'ViewContent', metaPixelParams(evento));
+
+    const btnComprar = document.getElementById('btnComprarEntrada');
+    if (btnComprar) {
+      btnComprar.addEventListener('click', () => {
+        if (typeof fbq === 'function') fbq('track', 'InitiateCheckout', metaPixelParams(evento));
+      });
+    }
   }
 
   fetch('data/fechas.json')
