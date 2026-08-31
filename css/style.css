@@ -870,6 +870,13 @@ html.sin-gradiente .text-gradiente {
   .nav-links.open { display: flex; }
   .nav-toggle { display: flex; }
 
+  /* El alto real del hero lo fija js/banner.js según la proporción de la
+     imagen. En celular esa altura suele quedar por debajo de min-height:320px,
+     y como el fondo va con background-size:contain aparecían barras negras
+     arriba y abajo del banner. Sacando el mínimo, la sección mide exactamente
+     lo que mide el banner. */
+  .hero { min-height: 0; }
+
   .fecha-divider { display: none; }
 
   .evento-layout {
