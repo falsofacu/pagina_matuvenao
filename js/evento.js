@@ -33,27 +33,11 @@
     if (el) el.setAttribute(attr, valor);
   }
 
-  async function existeImagen(ruta) {
-    try {
-      const res = await fetch(ruta, { method: 'HEAD', cache: 'no-store' });
-      return res.ok;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  // Si el evento no tiene portada propia, se usa el primer banner de la
-  // portada del sitio (1A/1B en img/banner/) en vez de una imagen fija.
-  async function buscarPortadaPorDefecto() {
-    const EXTENSIONES = ['jpg', 'jpeg', 'png', 'webp'];
-    const candidatos = [];
-    ['1A', '1B'].forEach((nombre) => {
-      EXTENSIONES.forEach((ext) => candidatos.push(`img/banner/${nombre}.${ext}`));
-    });
-    const resultados = await Promise.all(
-      candidatos.map(async (ruta) => ((await existeImagen(ruta)) ? ruta : null))
-    );
-    return resultados.find(Boolean) || 'img/biografia/main.webp';
+  // Portada por defecto según el show: los "Ranga XL" usan su propia portada,
+  // el resto usa la de Ranga.
+  function buscarPortadaPorDefecto(evento) {
+    const esXL = /\bXL\b/i.test(`${evento.show || ''} ${evento.titulo || ''}`);
+    return esXL ? 'img/portadas/RANGA_XL.png' : 'img/portadas/RANGA.png';
   }
 
   function metaPixelParams(evento) {
@@ -131,7 +115,7 @@
           .catch(() => '');
       }
 
-      const portadaPorDefecto = evento.portada ? null : await buscarPortadaPorDefecto();
+      const portadaPorDefecto = evento.portada ? null : buscarPortadaPorDefecto(evento);
       render(evento, descripcion.trim(), portadaPorDefecto);
     })
     .catch(() => {

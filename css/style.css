@@ -890,3 +890,148 @@ html.sin-gradiente .text-gradiente {
 
   .evento-panel-info { display: none; }
 }
+
+/* FECHAS - Shows "Ranga XL": barra destacada con el degradé + ruido de la
+   estética del show como fondo, y el contenido en blanco con sombra negra. */
+.fecha-item--xl {
+  position: relative;
+  overflow: visible;
+  border: none;
+  background-image: url('../img/gradiente_high.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  box-shadow: 0 6px 24px rgba(245, 76, 46, 0.45), 0 4px 18px rgba(0, 0, 0, 0.4);
+  transition: transform 0.4s cubic-bezier(0.2, 0.85, 0.25, 1.1),
+              box-shadow 0.4s ease;
+}
+
+/* Capa gemela detrás de la barra: misma textura, un poco más grande. En
+   reposo queda tapada exacta por la barra; en hover se le abren púas que
+   sobresalen por arriba y por abajo (animación de una sola pasada). */
+.fecha-item--xl::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  border-radius: inherit;
+  background-image: url('../img/gradiente_high.webp');
+  background-size: cover;
+  background-position: center;
+  clip-path: polygon(
+    0% 0%, 5% 0%, 9% 0%, 17% 0%, 22% 0%, 29% 0%, 38% 0%, 44% 0%, 51% 0%,
+    58% 0%, 63% 0%, 71% 0%, 79% 0%, 84% 0%, 91% 0%, 96% 0%, 100% 0%,
+    100% 33%, 100% 66%,
+    100% 100%, 97% 100%, 93% 100%, 88% 100%, 82% 100%, 74% 100%, 68% 100%,
+    61% 100%, 55% 100%, 47% 100%, 41% 100%, 33% 100%, 26% 100%, 19% 100%,
+    12% 100%, 7% 100%, 0% 100%,
+    0% 66%, 0% 33%
+  );
+  transition: inset 0.4s cubic-bezier(0.2, 0.85, 0.25, 1.1),
+              clip-path 0.4s cubic-bezier(0.2, 0.85, 0.25, 1.1),
+              filter 0.4s ease;
+}
+
+html.sin-gradiente .fecha-item--xl::before {
+  background-image: none;
+  background-color: var(--color-accent);
+}
+
+/* Fallback si no existe img/gradiente_high.webp (misma lógica que .text-gradiente) */
+html.sin-gradiente .fecha-item--xl {
+  background-image: none;
+  background-color: var(--color-accent);
+}
+
+/* Etiqueta "XL" en la esquina superior izquierda */
+.fecha-item--xl::after {
+  content: "XL";
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  padding: 4px 12px;
+  background: #0e0e10;
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  border-bottom-right-radius: var(--radius);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* Texto interior en blanco con sombra negra fuerte, para contraste contra
+   cualquier zona del degradé (incluye el que usa el degradé como máscara). */
+.fecha-item--xl .text-gradiente,
+.fecha-item--xl .fecha-fecha,
+.fecha-item--xl .fecha-ciudad,
+.fecha-item--xl .fecha-lugar,
+.fecha-item--xl .fecha-show {
+  background-image: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 3px 14px rgba(0, 0, 0, 0.7);
+}
+
+.fecha-item--xl .fecha-lugar { opacity: 0.92; }
+
+/* Divisores en blanco con sombra negra marcada en vez del naranja */
+.fecha-item--xl .fecha-divider {
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Botón de tickets: en reposo ya se ve "relleno" (blanco, texto oscuro). */
+.fecha-item--xl .btn-outline {
+  background-image: none;
+  background-color: #fff;
+  border-color: #fff;
+  color: #0e0e10;
+  -webkit-text-fill-color: #0e0e10;
+  text-shadow: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+/* En hover se comporta igual que cualquier botón del sitio. */
+.fecha-item--xl .btn-outline:hover {
+  background: var(--color-accent);
+  background-image: none;
+  border-color: var(--color-accent);
+  color: #fff;
+  -webkit-text-fill-color: #fff;
+  text-shadow: none;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(245, 76, 46, 0.35);
+}
+
+/* Hover: transición corta (una sola pasada, no loopea). La barra crece un
+   poco y proyecta un resplandor naranja que se expande. */
+.fecha-item--xl:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 44px rgba(245, 76, 46, 0.85),
+              0 6px 22px rgba(0, 0, 0, 0.5);
+}
+
+/* La capa de atrás abre púas que sobresalen ~20px por arriba y por abajo. */
+.fecha-item--xl:hover::before {
+  inset: -13px 0;
+  clip-path: polygon(
+    0% 0%, 5% 2%, 9% 16%, 17% 0%, 22% 9%, 29% 4%, 38% 20%, 44% 0%, 51% 12%,
+    58% 3%, 63% 18%, 71% 0%, 79% 7%, 84% 5%, 91% 15%, 96% 0%, 100% 0%,
+    100% 33%, 100% 66%,
+    100% 100%, 97% 98%, 93% 86%, 88% 100%, 82% 92%, 74% 97%, 68% 83%,
+    61% 100%, 55% 88%, 47% 96%, 41% 80%, 33% 100%, 26% 90%, 19% 98%,
+    12% 85%, 7% 100%, 0% 100%,
+    0% 66%, 0% 33%
+  );
+  filter: drop-shadow(0 0 12px rgba(245, 76, 46, 0.95));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fecha-item--xl,
+  .fecha-item--xl::before { transition: none; }
+  .fecha-item--xl:hover { transform: none; }
+}
