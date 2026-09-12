@@ -95,9 +95,11 @@
           <h3 class="fechas-mes-titulo text-gradiente">${grupo.titulo}</h3>
           <div class="fechas-mes-lista">
             ${grupo.items
-              .map(
-                (f) => `
-              <div class="fecha-item">
+              .map((f) => {
+                // Shows "Ranga XL": barra destacada con la estética del degradé.
+                const esXL = /\bXL\b/i.test(`${f.show || ''} ${f.titulo || ''}`);
+                return `
+              <div class="fecha-item${esXL ? ' fecha-item--xl' : ''}">
                 <div class="fecha-fecha text-gradiente">${formatFecha(f.fecha)}${f.hora ? ' · ' + f.hora : ''}</div>
                 <div class="fecha-divider"></div>
                 <div class="fecha-info">
@@ -108,8 +110,8 @@
                 <div class="fecha-show">${f.show || ''}</div>
                 <div class="fecha-divider"></div>
                 ${f.link ? `<a class="btn-outline text-gradiente" href="${usarLanding ? 'evento?id=' + f.id : f.link}" target="_blank">Tickets</a>` : ''}
-              </div>`
-              )
+              </div>`;
+              })
               .join('')}
           </div>
         </div>`
