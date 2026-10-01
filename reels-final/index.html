@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Matu Venao - Fechas (reel)</title>
+<!-- Placa 9:16 girada 90° (queda 16:9 horizontal en pantalla) con las próximas fechas, para el final
+     de los reels. Las fechas salen de data/fechas.json. Todo el contenido
+     queda dentro de la zona segura de Instagram (sin tapar con la UI). -->
+<style>
+  :root {
+    --color-bg: #0e0e10;
+    --color-text: #f2f2f2;
+    --color-muted: #a0a0a5;
+    --color-accent: #f54c2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+    color: var(--color-text);
+    text-transform: uppercase;
+  }
+
+  /* Lienzo 9:16 (16:9 girado 90°): ocupa lo máximo posible de la ventana.
+     Medidas en cqw/cqh (1% del ancho/alto del lienzo). El padding es la
+     zona segura: arriba 12%, abajo 20%, costados 13%. */
+  .placa {
+    position: relative;
+    /* Girada 90°: en pantalla queda horizontal 16:9, así que el alto de la
+       placa se limita por el ancho de la ventana y viceversa. */
+    flex: none;
+    width: min(100vh, 100vw * 9 / 16);
+    aspect-ratio: 9 / 16;
+    transform: rotate(90deg);
+    container-type: size;
+    overflow: hidden;
+    background: var(--color-bg) url('bg.png') center / cover no-repeat;
+  }
+
+  .zona-segura {
+    position: absolute;
+    inset: 12cqh 13cqw 20cqh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .logo {
+    width: 36cqw;
+    height: auto;
+    flex: none;
+  }
+
+  /* Fechas: se encogen solas (var --k) si no entran todas */
+  .fechas {
+    --k: 1;
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: calc(6cqw * var(--k));
+    margin: 4cqh 0;
+    min-height: 0;
+  }
+
+  .mes-titulo {
+    font-size: calc(8cqw * var(--k));
+    font-weight: 900;
+    letter-spacing: 0.4cqw;
+    line-height: 1.1;
+    margin-bottom: calc(2.6cqw * var(--k));
+  }
+
+  .lista {
+    display: flex;
+    flex-direction: column;
+    gap: calc(2.2cqw * var(--k));
+  }
+
+  .fecha {
+    display: grid;
+    grid-template-columns: 1fr auto 1.6fr;
+    align-items: center;
+    gap: calc(3cqw * var(--k));
+    padding: calc(2.6cqw * var(--k)) calc(3.4cqw * var(--k));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1.8cqw;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .fecha-dia {
+    font-size: calc(6cqw * var(--k));
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .fecha-hora {
+    margin-top: calc(0.8cqw * var(--k));
+    font-size: calc(2.6cqw * var(--k));
+    font-weight: 700;
+    letter-spacing: 0.3cqw;
+    color: var(--color-muted);
+  }
+
+  .divisor {
+    width: 3px;
+    align-self: stretch;
+    background: var(--color-accent);
+    border-radius: 2px;
+  }
+
+  .fecha-info { text-align: left; min-width: 0; }
+
+  .fecha-ciudad {
+    display: flex;
+    align-items: center;
+    gap: calc(1.6cqw * var(--k));
+    font-size: calc(4.8cqw * var(--k));
+    font-weight: 900;
+    line-height: 1.05;
+  }
+
+  .fecha-lugar {
+    margin-top: calc(0.8cqw * var(--k));
+    font-size: calc(2.6cqw * var(--k));
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .bandera {
+    flex: none;
+    width: calc(6.4cqw * var(--k));
+    height: auto;
+    border-radius: 0.5cqw;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 0.5cqw 2cqw rgba(0, 0, 0, 0.5);
+  }
+
+  /* RANGA XL: barra con el degradé del show y el logo XL a la derecha */
+  .fecha--xl {
+    grid-template-columns: 1fr auto 1.6fr auto;
+    border: none;
+    background: url('../img/gradiente_high.webp') center / cover no-repeat;
+    box-shadow: 0 0.6cqw 3cqw rgba(245, 76, 46, 0.28), 0 0.5cqw 2cqw rgba(0, 0, 0, 0.35);
+  }
+
+  .fecha--xl .fecha-dia,
+  .fecha--xl .fecha-hora,
+  .fecha--xl .fecha-ciudad,
+  .fecha--xl .fecha-lugar {
+    background: none;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 3px 14px rgba(0, 0, 0, 0.7);
+  }
+
+  .fecha--xl .divisor {
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  }
+
+  /* xl.png tiene aire transparente alrededor: el margen negativo lo compensa */
+  .xl {
+    width: calc(17cqw * var(--k));
+    height: auto;
+    margin: calc(-3.4cqw * var(--k)) calc(0.6cqw * var(--k)) calc(-3.4cqw * var(--k)) 0;
+    align-self: center;
+    filter: drop-shadow(0 0.4cqw 1.2cqw rgba(0, 0, 0, 0.6));
+  }
+
+  .sin-fechas {
+    color: var(--color-muted);
+    font-size: 4cqw;
+  }
+
+  .pie {
+    flex: none;
+    color: #fff;
+    font-size: 3.8cqw;
+    font-weight: 900;
+    letter-spacing: 0.6cqw;
+    line-height: 1.15;
+  }
+
+  .pie-web {
+    display: block;
+    font-size: 6.2cqw;
+    letter-spacing: 0.2cqw;
+  }
+
+  /* Textura de degradé como máscara del texto (igual que .text-gradiente de la web) */
+  .text-gradiente {
+    background-image: url('../img/gradiente.webp');
+    background-size: 100% auto;
+    background-position: left center;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  html.sin-gradiente .text-gradiente {
+    background-image: none;
+    color: var(--color-accent);
+    -webkit-text-fill-color: var(--color-accent);
+  }
+</style>
+<script>
+  (function () {
+    const img = new Image();
+    img.onerror = () => document.documentElement.classList.add('sin-gradiente');
+    img.src = '../img/gradiente.webp';
+  })();
+</script>
+</head>
+<body>
+
+<main class="placa" id="placa">
+  <div class="zona-segura">
+  <img class="logo" src="ranga.png" alt="RANGA">
+
+  <section class="fechas" id="fechas"></section>
+
+  <footer class="pie">
+    Entradas en
+    <span class="pie-web">matuvenao.com</span>
+  </footer>
+  </div>
+</main>
+
+<script>
+(function () {
+  const wrap = document.getElementById('fechas');
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const MESES_LARGO = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+  const BANDERA_AR = `<svg class="bandera" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+      <rect width="30" height="20" fill="#fff"/>
+      <rect width="30" height="6.66" fill="#75aadb"/>
+      <rect y="13.33" width="30" height="6.67" fill="#75aadb"/>
+      <circle cx="15" cy="10" r="2.6" fill="#fcbf49"/>
+    </svg>`;
+
+  // Acepta "AR" o el emoji 🇦🇷 en el campo pais (igual que js/fechas.js)
+  function codigoPais(str) {
+    if (!str) return '';
+    const puntos = Array.from(str);
+    if (puntos.length === 2) {
+      const letras = puntos.map((p) => {
+        const c = p.codePointAt(0) - 0x1f1e6;
+        return c >= 0 && c <= 25 ? String.fromCharCode(65 + c) : null;
+      });
+      if (letras[0] && letras[1]) return letras.join('');
+    }
+    return str.toUpperCase();
+  }
+
+  // Fecha local (no UTC), así de noche no se "salta" el show de hoy
+  function hoyISO() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+
+  // Si las fechas no entran en la zona segura, achica todo de a poco
+  function ajustar() {
+    let k = 1;
+    wrap.style.setProperty('--k', k);
+    while (wrap.scrollHeight > wrap.clientHeight + 1 && k > 0.4) {
+      k -= 0.03;
+      wrap.style.setProperty('--k', k.toFixed(2));
+    }
+  }
+
+  fetch('../data/fechas.json')
+    .then((r) => r.json())
+    .then((fechas) => {
+      const hoy = hoyISO();
+      const proximas = fechas
+        .filter((f) => f.fecha >= hoy)
+        .sort((a, b) => (a.fecha + (a.hora || '')).localeCompare(b.fecha + (b.hora || '')));
+
+      if (!proximas.length) {
+        wrap.innerHTML = '<p class="sin-fechas">Pronto nuevas fechas</p>';
+        return;
+      }
+
+      const grupos = [];
+      proximas.forEach((f) => {
+        const clave = f.fecha.slice(0, 7);
+        let g = grupos[grupos.length - 1];
+        if (!g || g.clave !== clave) {
+          g = { clave, mes: Number(f.fecha.slice(5, 7)), items: [] };
+          grupos.push(g);
+        }
+        g.items.push(f);
+      });
+
+      wrap.innerHTML = grupos.map((g) => `
+        <div class="mes">
+          <h2 class="mes-titulo text-gradiente">${MESES_LARGO[g.mes - 1]}</h2>
+          <div class="lista">
+            ${g.items.map((f) => {
+              const [, m, d] = f.fecha.split('-').map(Number);
+              const esXL = /\bXL\b/i.test(`${f.show || ''} ${f.titulo || ''}`);
+              const esAR = codigoPais(f.pais) === 'AR';
+              return `
+              <div class="fecha${esXL ? ' fecha--xl' : ''}">
+                <div>
+                  <div class="fecha-dia text-gradiente">${d} ${MESES[m - 1]}</div>
+                  ${f.hora ? `<div class="fecha-hora">${f.hora} hs</div>` : ''}
+                </div>
+                <div class="divisor"></div>
+                <div class="fecha-info">
+                  <div class="fecha-ciudad">${esAR ? BANDERA_AR : ''}<span>${f.ciudad}</span></div>
+                  ${f.lugar ? `<div class="fecha-lugar">${f.lugar}</div>` : ''}
+                </div>
+                ${esXL ? '<img class="xl" src="xl.png" alt="XL">' : ''}
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`).join('');
+
+      ajustar();
+    })
+    .catch(() => {
+      wrap.innerHTML = '<p class="sin-fechas">No se pudieron cargar las fechas.</p>';
+    });
+
+  window.addEventListener('resize', ajustar);
+})();
+</script>
+</body>
+</html>
