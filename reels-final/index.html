@@ -107,14 +107,6 @@
     white-space: nowrap;
   }
 
-  .fecha-hora {
-    margin-top: calc(0.8cqw * var(--k));
-    font-size: calc(2.6cqw * var(--k));
-    font-weight: 700;
-    letter-spacing: 0.3cqw;
-    color: var(--color-muted);
-  }
-
   .divisor {
     width: 3px;
     align-self: stretch;
@@ -157,7 +149,6 @@
   }
 
   .fecha--xl .fecha-dia,
-  .fecha--xl .fecha-hora,
   .fecha--xl .fecha-ciudad,
   .fecha--xl .fecha-lugar {
     background: none;
@@ -293,7 +284,9 @@
       const hoy = hoyISO();
       const proximas = fechas
         .filter((f) => f.fecha >= hoy)
-        .sort((a, b) => (a.fecha + (a.hora || '')).localeCompare(b.fecha + (b.hora || '')));
+        .sort((a, b) => (a.fecha + (a.hora || '')).localeCompare(b.fecha + (b.hora || '')))
+        // Dos funciones el mismo día se muestran como una sola fecha
+        .filter((f, i, arr) => i === 0 || f.fecha !== arr[i - 1].fecha);
 
       if (!proximas.length) {
         wrap.innerHTML = '<p class="sin-fechas">Pronto nuevas fechas</p>';
@@ -321,10 +314,7 @@
               const esAR = codigoPais(f.pais) === 'AR';
               return `
               <div class="fecha${esXL ? ' fecha--xl' : ''}">
-                <div>
-                  <div class="fecha-dia text-gradiente">${d} ${MESES[m - 1]}</div>
-                  ${f.hora ? `<div class="fecha-hora">${f.hora} hs</div>` : ''}
-                </div>
+                <div class="fecha-dia text-gradiente">${d} ${MESES[m - 1]}</div>
                 <div class="divisor"></div>
                 <div class="fecha-info">
                   <div class="fecha-ciudad">${esAR ? BANDERA_AR : ''}<span>${f.ciudad}</span></div>
@@ -337,12 +327,18 @@
         </div>`).join('');
 
       ajustar();
+      // El logo y xl.png cambian el espacio libre cuando terminan de cargar:
+      // sin caché (primera visita) las fechas quedaban tapando el pie.
+      Array.from(document.images)
+        .filter((img) => !img.complete)
+        .forEach((img) => img.addEventListener('load', ajustar, { once: true }));
     })
     .catch(() => {
       wrap.innerHTML = '<p class="sin-fechas">No se pudieron cargar las fechas.</p>';
     });
 
   window.addEventListener('resize', ajustar);
+  window.addEventListener('load', ajustar);
 })();
 </script>
 </body>

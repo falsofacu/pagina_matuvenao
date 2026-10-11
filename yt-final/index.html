@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Matu Venao - Fechas (YouTube)</title>
+<!-- Placa horizontal 16:9 con las próximas fechas, sin fondo, para usar como
+     overlay al final de los videos de YouTube. Las fechas salen de
+     data/fechas.json. Si no entran en 16:9 la placa crece hacia abajo (no se
+     achica). El botón descarga la placa como PNG transparente de 1920 px de ancho. -->
+<style>
+  :root {
+    --color-text: #f2f2f2;
+    --color-muted: #b4b4ba;
+    --color-accent: #f54c2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    /* Damero para ver la transparencia; no sale en el PNG */
+    background: #1a1a1d repeating-conic-gradient(#26262a 0 25%, #1a1a1d 0 50%) 0 0 / 32px 32px;
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+    color: var(--color-text);
+  }
+
+  .barra {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: #0e0e10;
+    border-bottom: 1px solid #2a2a2e;
+    font-size: 14px;
+    color: var(--color-muted);
+  }
+
+  .barra button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .barra button:disabled { opacity: 0.6; cursor: wait; }
+
+  /* Lienzo 16:9 que crece hacia abajo si hace falta. Medidas en cqw
+     (1% del ancho), así el PNG sale igual sea cual sea la ventana. */
+  .placa {
+    container-type: inline-size;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-transform: uppercase;
+  }
+
+  /* Una sola columna centrada */
+  .fechas {
+    width: 50cqw;
+    margin: 0 auto;
+    padding: 4cqw 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6cqw;
+  }
+
+  .mes-titulo {
+    margin-top: 1.4cqw;
+    text-align: center;
+    font-size: 3.6cqw;
+    font-weight: 900;
+    letter-spacing: 0.2cqw;
+    line-height: 1.1;
+  }
+
+  .mes-titulo:first-child { margin-top: 0; }
+
+  .fecha {
+    display: grid;
+    grid-template-columns: 12.5cqw auto 1fr;
+    align-items: center;
+    gap: 1.6cqw;
+    padding: 1.3cqw 1.8cqw;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.9cqw;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0.3cqw 1.2cqw rgba(0, 0, 0, 0.35);
+  }
+
+  .fecha-dia {
+    font-size: 3.2cqw;
+    font-weight: 900;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .divisor {
+    width: 3px;
+    align-self: stretch;
+    background: var(--color-accent);
+    border-radius: 2px;
+  }
+
+  .fecha-info { min-width: 0; }
+
+  .fecha-ciudad {
+    display: flex;
+    align-items: center;
+    gap: 0.8cqw;
+    font-size: 2.4cqw;
+    font-weight: 900;
+    line-height: 1.05;
+  }
+
+  .fecha-lugar {
+    margin-top: 0.4cqw;
+    font-size: 1.3cqw;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .bandera {
+    flex: none;
+    width: 3.2cqw;
+    height: auto;
+    border-radius: 0.25cqw;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 0.25cqw 1cqw rgba(0, 0, 0, 0.5);
+  }
+
+  /* RANGA XL: barra con el degradé del show y el logo XL a la derecha */
+  .fecha--xl {
+    grid-template-columns: 12.5cqw auto 1fr auto;
+    border: none;
+    background: url('../img/gradiente_high.webp') center / cover no-repeat;
+    box-shadow: 0 0.3cqw 1.5cqw rgba(245, 76, 46, 0.28), 0 0.25cqw 1cqw rgba(0, 0, 0, 0.35);
+  }
+
+  .fecha--xl .fecha-dia,
+  .fecha--xl .fecha-ciudad,
+  .fecha--xl .fecha-lugar {
+    background: none;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 3px 14px rgba(0, 0, 0, 0.7);
+  }
+
+  .fecha--xl .divisor {
+    background: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+  }
+
+  /* xl.png tiene aire transparente alrededor: el margen negativo lo compensa */
+  .xl {
+    width: 8.5cqw;
+    height: auto;
+    margin: -1.7cqw 0.3cqw -1.7cqw 0;
+    filter: drop-shadow(0 0.2cqw 0.6cqw rgba(0, 0, 0, 0.6));
+  }
+
+  .sin-fechas {
+    text-align: center;
+    font-size: 2.4cqw;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+
+  /* Textura de degradé como máscara del texto (igual que .text-gradiente de la web) */
+  .text-gradiente {
+    background-image: url('../img/gradiente.webp');
+    background-size: 100% auto;
+    background-position: left center;
+    background-repeat: no-repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  html.sin-gradiente .text-gradiente {
+    background-image: none;
+    color: var(--color-accent);
+    -webkit-text-fill-color: var(--color-accent);
+  }
+</style>
+<script>
+  (function () {
+    const img = new Image();
+    img.onerror = () => document.documentElement.classList.add('sin-gradiente');
+    img.src = '../img/gradiente.webp';
+  })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
+</head>
+<body>
+
+<div class="barra">
+  <button type="button" id="descargar" disabled>Descargar PNG</button>
+  <span id="estado">Cargando fechas…</span>
+</div>
+
+<main class="placa" id="placa">
+  <section class="fechas" id="fechas"></section>
+</main>
+
+<script>
+(function () {
+  const ANCHO_PNG = 1920;
+  const placa = document.getElementById('placa');
+  const wrap = document.getElementById('fechas');
+  const boton = document.getElementById('descargar');
+  const estado = document.getElementById('estado');
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const MESES_LARGO = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  ];
+  const BANDERA_AR = `<svg class="bandera" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+      <rect width="30" height="20" fill="#fff"/>
+      <rect width="30" height="6.66" fill="#75aadb"/>
+      <rect y="13.33" width="30" height="6.67" fill="#75aadb"/>
+      <circle cx="15" cy="10" r="2.6" fill="#fcbf49"/>
+    </svg>`;
+
+  // Acepta "AR" o el emoji 🇦🇷 en el campo pais (igual que js/fechas.js)
+  function codigoPais(str) {
+    if (!str) return '';
+    const puntos = Array.from(str);
+    if (puntos.length === 2) {
+      const letras = puntos.map((p) => {
+        const c = p.codePointAt(0) - 0x1f1e6;
+        return c >= 0 && c <= 25 ? String.fromCharCode(65 + c) : null;
+      });
+      if (letras[0] && letras[1]) return letras.join('');
+    }
+    return str.toUpperCase();
+  }
+
+  // Fecha local (no UTC), así de noche no se "salta" el show de hoy
+  function hoyISO() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  }
+
+  // Escala de pantalla a PNG (rect y no offsetWidth: el alto 16:9 tiene decimales)
+  function escala() {
+    return ANCHO_PNG / placa.getBoundingClientRect().width;
+  }
+
+  function mostrarTamano() {
+    const alto = Math.round(placa.getBoundingClientRect().height * escala());
+    estado.textContent = `PNG de ${ANCHO_PNG} × ${alto} px` +
+      (alto > 1080 ? ' (más alto que 16:9: hay que scrollearlo)' : '');
+  }
+
+  function descargar() {
+    if (!window.htmlToImage) {
+      estado.textContent = 'No se pudo cargar el generador de PNG (¿sin internet?).';
+      return;
+    }
+    boton.disabled = true;
+    estado.textContent = 'Generando PNG…';
+    htmlToImage.toPng(placa, { pixelRatio: escala() })
+      .then((url) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fechas-yt-${hoyISO()}.png`;
+        a.click();
+        mostrarTamano();
+      })
+      .catch(() => {
+        estado.textContent = 'Error al generar el PNG.';
+      })
+      .finally(() => {
+        boton.disabled = false;
+      });
+  }
+
+  fetch('../data/fechas.json')
+    .then((r) => r.json())
+    .then((fechas) => {
+      const hoy = hoyISO();
+      const proximas = fechas
+        .filter((f) => f.fecha >= hoy)
+        .sort((a, b) => (a.fecha + (a.hora || '')).localeCompare(b.fecha + (b.hora || '')))
+        // Dos funciones el mismo día se muestran como una sola fecha
+        .filter((f, i, arr) => i === 0 || f.fecha !== arr[i - 1].fecha);
+
+      if (!proximas.length) {
+        wrap.innerHTML = '<p class="sin-fechas">Pronto nuevas fechas</p>';
+      } else {
+        let mesActual = '';
+        wrap.innerHTML = proximas.map((f) => {
+          const [, m, d] = f.fecha.split('-').map(Number);
+          const esXL = /\bXL\b/i.test(`${f.show || ''} ${f.titulo || ''}`);
+          const esAR = codigoPais(f.pais) === 'AR';
+          const clave = f.fecha.slice(0, 7);
+          const titulo = clave !== mesActual
+            ? `<h2 class="mes-titulo text-gradiente">${MESES_LARGO[m - 1]}</h2>`
+            : '';
+          mesActual = clave;
+          return `${titulo}
+            <div class="fecha${esXL ? ' fecha--xl' : ''}">
+              <div class="fecha-dia text-gradiente">${d} ${MESES[m - 1]}</div>
+              <div class="divisor"></div>
+              <div class="fecha-info">
+                <div class="fecha-ciudad">${esAR ? BANDERA_AR : ''}<span>${f.ciudad}</span></div>
+                ${f.lugar ? `<div class="fecha-lugar">${f.lugar}</div>` : ''}
+              </div>
+              ${esXL ? '<img class="xl" src="../reels-final/xl.png" alt="XL">' : ''}
+            </div>`;
+        }).join('');
+      }
+
+      boton.disabled = false;
+      mostrarTamano();
+      Array.from(document.images)
+        .filter((img) => !img.complete)
+        .forEach((img) => img.addEventListener('load', mostrarTamano, { once: true }));
+    })
+    .catch(() => {
+      wrap.innerHTML = '<p class="sin-fechas">No se pudieron cargar las fechas.</p>';
+      estado.textContent = '';
+    });
+
+  boton.addEventListener('click', descargar);
+  window.addEventListener('resize', mostrarTamano);
+})();
+</script>
+</body>
+</html>
