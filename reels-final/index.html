@@ -5,9 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>Matu Venao - Fechas (reel)</title>
-<!-- Placa 9:16 girada 90° (queda 16:9 horizontal en pantalla) con las próximas fechas, para el final
-     de los reels. Las fechas salen de data/fechas.json. Todo el contenido
-     queda dentro de la zona segura de Instagram (sin tapar con la UI). -->
+<!-- Placa 9:16 con las próximas fechas, para el final de los reels. Las
+     fechas salen de data/fechas.json. Todo el contenido queda dentro de la
+     zona segura de Instagram (sin tapar con la UI). El botón descarga la
+     placa completa (con fondo) como PNG de 1080 × 1920. -->
 <style>
   :root {
     --color-bg: #0e0e10;
@@ -21,28 +22,53 @@
   html, body { height: 100%; }
 
   body {
+    --alto-barra: 56px;
     background: #000;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
     overflow: hidden;
     font-family: 'Segoe UI', system-ui, Arial, sans-serif;
     color: var(--color-text);
-    text-transform: uppercase;
   }
 
-  /* Lienzo 9:16 (16:9 girado 90°): ocupa lo máximo posible de la ventana.
+  .barra {
+    align-self: stretch;
+    height: var(--alto-barra);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    background: #0e0e10;
+    border-bottom: 1px solid #2a2a2e;
+    font-size: 14px;
+    color: var(--color-muted);
+  }
+
+  .barra button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background: var(--color-accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .barra button:disabled { opacity: 0.6; cursor: wait; }
+
+  /* Lienzo 9:16: ocupa lo máximo posible de la ventana debajo de la barra.
      Medidas en cqw/cqh (1% del ancho/alto del lienzo). El padding es la
      zona segura: arriba 12%, abajo 20%, costados 13%. */
   .placa {
     position: relative;
-    /* Girada 90°: en pantalla queda horizontal 16:9, así que el alto de la
-       placa se limita por el ancho de la ventana y viceversa. */
     flex: none;
-    width: min(100vh, 100vw * 9 / 16);
+    margin: auto;
+    width: min(100vw, (100vh - var(--alto-barra)) * 9 / 16);
     aspect-ratio: 9 / 16;
-    transform: rotate(90deg);
     container-type: size;
+    text-transform: uppercase;
     overflow: hidden;
     background: var(--color-bg) url('bg.png') center / cover no-repeat;
   }
@@ -216,8 +242,14 @@
     img.src = '../img/gradiente.webp';
   })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 </head>
 <body>
+
+<div class="barra">
+  <button type="button" id="descargar">Descargar PNG</button>
+  <span id="estado">PNG de 1080 × 1920 px</span>
+</div>
 
 <main class="placa" id="placa">
   <div class="zona-segura">
@@ -234,7 +266,11 @@
 
 <script>
 (function () {
+  const ANCHO_PNG = 1080;
+  const placa = document.getElementById('placa');
   const wrap = document.getElementById('fechas');
+  const boton = document.getElementById('descargar');
+  const estado = document.getElementById('estado');
   const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const MESES_LARGO = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -276,6 +312,30 @@
       k -= 0.03;
       wrap.style.setProperty('--k', k.toFixed(2));
     }
+  }
+
+  function descargar() {
+    if (!window.htmlToImage) {
+      estado.textContent = 'No se pudo cargar el generador de PNG (¿sin internet?).';
+      return;
+    }
+    boton.disabled = true;
+    estado.textContent = 'Generando PNG…';
+    // rect y no offsetWidth: el ancho tiene decimales
+    htmlToImage.toPng(placa, { pixelRatio: ANCHO_PNG / placa.getBoundingClientRect().width })
+      .then((url) => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `fechas-reel-${hoyISO()}.png`;
+        a.click();
+        estado.textContent = 'PNG de 1080 × 1920 px';
+      })
+      .catch(() => {
+        estado.textContent = 'Error al generar el PNG.';
+      })
+      .finally(() => {
+        boton.disabled = false;
+      });
   }
 
   fetch('../data/fechas.json')
@@ -337,6 +397,7 @@
       wrap.innerHTML = '<p class="sin-fechas">No se pudieron cargar las fechas.</p>';
     });
 
+  boton.addEventListener('click', descargar);
   window.addEventListener('resize', ajustar);
   window.addEventListener('load', ajustar);
 })();
