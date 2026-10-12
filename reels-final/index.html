@@ -322,7 +322,12 @@
     boton.disabled = true;
     estado.textContent = 'Generando PNG…';
     // rect y no offsetWidth: el ancho tiene decimales
-    htmlToImage.toPng(placa, { pixelRatio: ANCHO_PNG / placa.getBoundingClientRect().width })
+    // margin:0 en el clon: con margin:auto (centrado en pantalla) la placa se
+    // corre fuera del cuadro y el PNG sale transparente en ventanas grandes
+    htmlToImage.toPng(placa, {
+      pixelRatio: ANCHO_PNG / placa.getBoundingClientRect().width,
+      style: { margin: '0' },
+    })
       .then((url) => {
         const a = document.createElement('a');
         a.href = url;
