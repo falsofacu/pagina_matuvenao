@@ -99,7 +99,7 @@
                 // Shows "Ranga XL": barra destacada con la estética del degradé.
                 const esXL = /\bXL\b/i.test(`${f.show || ''} ${f.titulo || ''}`);
                 return `
-              <div class="fecha-item${esXL ? ' fecha-item--xl' : ''}">
+              <div class="fecha-item${esXL ? ' fecha-item--xl' : ''}${f.agotado ? ' fecha-item--agotado' : ''}">
                 <div class="fecha-fecha text-gradiente">${formatFecha(f.fecha)}${f.hora ? ' · ' + f.hora : ''}</div>
                 <div class="fecha-divider"></div>
                 <div class="fecha-info">
@@ -109,7 +109,7 @@
                 <div class="fecha-divider"></div>
                 <div class="fecha-show">${f.show || ''}</div>
                 <div class="fecha-divider"></div>
-                ${f.link ? `<a class="btn-outline text-gradiente" href="${usarLanding ? 'evento?id=' + f.id : f.link}" target="_blank">Tickets</a>` : ''}
+                ${f.agotado ? '<span class="fecha-agotado">Agotado</span>' : f.link ? `<a class="btn-outline text-gradiente" href="${usarLanding ? 'evento?id=' + f.id : f.link}" target="_blank">Tickets</a>` : ''}
               </div>`;
               })
               .join('')}
