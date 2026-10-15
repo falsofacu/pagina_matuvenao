@@ -305,6 +305,13 @@ img { max-width: 100%; display: block; }
   min-height: 40px;
 }
 
+/* Si la lista no tiene ancho para todo en una línea, la fila se parte y los
+   divisores quedan desalineados: se ocultan. */
+.fechas-mes-lista { container-type: inline-size; }
+@container (max-width: 800px) {
+  .fecha-divider { display: none; }
+}
+
 .fecha-fecha {
   min-width: 110px;
   font-size: 1.15rem;
@@ -868,8 +875,6 @@ html.sin-gradiente .text-gradiente {
      arriba y abajo del banner. Sacando el mínimo, la sección mide exactamente
      lo que mide el banner. */
   .hero { min-height: 0; }
-
-  .fecha-divider { display: none; }
 
   .evento-layout {
     grid-template-columns: 1fr;
