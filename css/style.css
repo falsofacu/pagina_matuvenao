@@ -908,6 +908,13 @@ html.sin-gradiente .text-gradiente {
   white-space: nowrap;
 }
 
+.fecha-item > .btn-outline,
+.fecha-agotado {
+  min-width: 124px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
 .fecha-item--agotado .fecha-fecha,
 .fecha-item--agotado .fecha-info,
 .fecha-item--agotado .fecha-show { opacity: 0.55; }
