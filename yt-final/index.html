@@ -49,6 +49,14 @@
 
   .barra button:disabled { opacity: 0.6; cursor: wait; }
 
+  .barra label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: var(--color-text);
+  }
+
   /* Lienzo 16:9 que crece hacia abajo si hace falta. Medidas en cqw
      (1% del ancho), así el PNG sale igual sea cual sea la ventana. */
   .placa {
@@ -66,10 +74,26 @@
     width: 50cqw;
     margin: 0 auto;
     padding: 4cqw 0;
+  }
+
+  .lista {
     display: flex;
     flex-direction: column;
     gap: 1.6cqw;
   }
+
+  /* Título opcional arriba de todo (checkbox "Cierre de ciclo" de la barra) */
+  .cierre {
+    margin-bottom: 0.6cqw;
+    text-align: center;
+    font-size: 5.5cqw;
+    font-weight: 900;
+    letter-spacing: 0.3cqw;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .cierre[hidden] { display: none; }
 
   .mes-titulo {
     margin-top: 1.4cqw;
@@ -202,11 +226,15 @@
 
 <div class="barra">
   <button type="button" id="descargar" disabled>Descargar PNG</button>
+  <label><input type="checkbox" id="toggle-cierre" checked> Cierre de ciclo</label>
   <span id="estado">Cargando fechas…</span>
 </div>
 
 <main class="placa" id="placa">
-  <section class="fechas" id="fechas"></section>
+  <section class="fechas">
+    <h1 class="cierre text-gradiente" id="cierre">Cierre de ciclo</h1>
+    <div class="lista" id="fechas"></div>
+  </section>
 </main>
 
 <script>
@@ -216,7 +244,9 @@
   const wrap = document.getElementById('fechas');
   const boton = document.getElementById('descargar');
   const estado = document.getElementById('estado');
-  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const cierre = document.getElementById('cierre');
+  const toggleCierre = document.getElementById('toggle-cierre');
+  const MESES =['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const MESES_LARGO = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -330,6 +360,13 @@
       estado.textContent = '';
     });
 
+  function aplicarCierre() {
+    cierre.hidden = !toggleCierre.checked;
+    if (!boton.disabled) mostrarTamano();
+  }
+
+  aplicarCierre();
+  toggleCierre.addEventListener('change', aplicarCierre);
   boton.addEventListener('click', descargar);
   window.addEventListener('resize', mostrarTamano);
 })();
