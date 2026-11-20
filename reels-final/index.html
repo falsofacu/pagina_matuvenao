@@ -58,6 +58,31 @@
 
   .barra button:disabled { opacity: 0.6; cursor: wait; }
 
+  /* Checklist de fechas (fuera de la placa, no sale en el PNG) */
+  .panel {
+    position: fixed;
+    top: calc(var(--alto-barra) + 12px);
+    left: 12px;
+    width: 230px;
+    max-height: calc(100vh - var(--alto-barra) - 24px);
+    overflow-y: auto;
+    padding: 12px;
+    background: #17171a;
+    border: 1px solid #2a2a2e;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 5;
+  }
+  .panel-titulo { font-weight: 700; margin-bottom: 8px; }
+  .panel-acciones { display: flex; gap: 6px; margin-bottom: 8px; }
+  .panel-acciones button {
+    flex: 1; padding: 4px 0; border: 1px solid #3a3a40; border-radius: 6px;
+    background: none; color: var(--color-text); font: inherit; cursor: pointer;
+  }
+  .check { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; }
+  .check input { accent-color: var(--color-accent); }
+  .check b { color: var(--color-accent); }
+
   /* Lienzo 9:16: ocupa lo máximo posible de la ventana debajo de la barra.
      Medidas en cqw/cqh (1% del ancho/alto del lienzo). El padding es la
      zona segura: arriba 12%, abajo 20%, costados 13%. */
@@ -267,6 +292,15 @@
   <span id="estado">PNG de 1080 × 1920 px</span>
 </div>
 
+<aside class="panel">
+  <div class="panel-titulo">Fechas a mostrar</div>
+  <div class="panel-acciones">
+    <button type="button" id="todas">Todas</button>
+    <button type="button" id="ninguna">Ninguna</button>
+  </div>
+  <div id="checklist"></div>
+</aside>
+
 <main class="placa" id="placa">
   <div class="zona-segura">
   <img class="logo" src="ranga.png" alt="RANGA">
@@ -377,6 +411,59 @@
         return;
       }
 
+      todas = proximas;
+      construirChecklist();
+      render();
+    })
+    .catch(() => {
+      wrap.innerHTML = '<p class="sin-fechas">No se pudieron cargar las fechas.</p>';
+    });
+
+  // Checklist: qué fechas se muestran en la placa (se recuerda en el navegador)
+  const CLAVE_LS = 'reels-final-ocultas';
+  let todas = [];
+  let ocultas = new Set();
+  try { ocultas = new Set(JSON.parse(localStorage.getItem(CLAVE_LS) || '[]')); } catch (e) {}
+
+  function guardar() {
+    try { localStorage.setItem(CLAVE_LS, JSON.stringify([...ocultas])); } catch (e) {}
+  }
+
+  function construirChecklist() {
+    const lista = document.getElementById('checklist');
+    lista.innerHTML = todas.map((f) => {
+      const [, m, d] = f.fecha.split('-').map(Number);
+      return `<label class="check">
+        <input type="checkbox" value="${f.fecha}"${ocultas.has(f.fecha) ? '' : ' checked'}>
+        <span><b>${d} ${MESES[m - 1]}</b> ${f.ciudad}</span>
+      </label>`;
+    }).join('');
+    lista.addEventListener('change', (e) => {
+      if (e.target.type !== 'checkbox') return;
+      if (e.target.checked) ocultas.delete(e.target.value); else ocultas.add(e.target.value);
+      guardar();
+      render();
+    });
+    document.getElementById('todas').addEventListener('click', () => marcar(true));
+    document.getElementById('ninguna').addEventListener('click', () => marcar(false));
+  }
+
+  function marcar(valor) {
+    document.querySelectorAll('#checklist input').forEach((c) => {
+      c.checked = valor;
+      if (valor) ocultas.delete(c.value); else ocultas.add(c.value);
+    });
+    guardar();
+    render();
+  }
+
+  function render() {
+    {
+      const proximas = todas.filter((f) => !ocultas.has(f.fecha));
+      if (!proximas.length) {
+        wrap.innerHTML = '<p class="sin-fechas">Pronto nuevas fechas</p>';
+        return;
+      }
       const grupos = [];
       proximas.forEach((f) => {
         const clave = f.fecha.slice(0, 7);
@@ -417,10 +504,8 @@
       Array.from(document.images)
         .filter((img) => !img.complete)
         .forEach((img) => img.addEventListener('load', ajustar, { once: true }));
-    })
-    .catch(() => {
-      wrap.innerHTML = '<p class="sin-fechas">No se pudieron cargar las fechas.</p>';
-    });
+    }
+  }
 
   boton.addEventListener('click', descargar);
   window.addEventListener('resize', ajustar);
